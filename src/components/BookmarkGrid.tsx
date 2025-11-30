@@ -1,0 +1,214 @@
+/**
+ * Bookmark Grid Component
+ * 저장된 이미지를 2열 그리드로 표시
+ */
+
+import React from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { Theme } from '@/theme/tokens';
+import { BookmarkItem } from '@/data/mock';
+
+interface BookmarkGridProps {
+  bookmarks: BookmarkItem[];
+  title?: string;
+  onBookmarkPress?: (bookmark: BookmarkItem) => void;
+}
+
+export const BookmarkGrid: React.FC<BookmarkGridProps> = ({ 
+  bookmarks, 
+  title,
+  onBookmarkPress 
+}) => {
+  const renderItem = ({ item }: { item: BookmarkItem }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onBookmarkPress?.(item)}
+      activeOpacity={0.8}
+    >
+      {/* 이미지 */}
+      <Image 
+        source={{ 
+          uri: item.imageUrl,
+          cache: 'force-cache', // 캐시 강제 사용
+        }} 
+        style={styles.image}
+        resizeMode="cover"
+        fadeDuration={300} // 페이드 인 효과
+      />
+      
+      {/* 카드 정보 */}
+      <View style={styles.content}>
+        <Text style={styles.title} numberOfLines={2}>
+          {item.title}
+        </Text>
+        {item.source && (
+          <Text style={styles.source}>{item.source}</Text>
+        )}
+        
+        {/* 설명 */}
+        {item.description && (
+          <Text style={styles.description} numberOfLines={2}>
+            {item.description}
+          </Text>
+        )}
+        
+        {/* 메모 표시 */}
+        {item.memo && (
+          <View style={styles.memoIndicator}>
+            <Text style={styles.memoText}>📝 메모 있음</Text>
+          </View>
+        )}
+        
+        {/* 태그 */}
+        {item.tags && item.tags.length > 0 && (
+          <View style={styles.tags}>
+            {item.tags.slice(0, 2).map((tag, index) => (
+              <View key={index} style={styles.tag}>
+                <Text style={styles.tagText}>{tag}</Text>
+              </View>
+            ))}
+            {item.tags.length > 2 && (
+              <Text style={styles.moreText}>+{item.tags.length - 2}</Text>
+            )}
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.container}>
+      {/* 섹션 타이틀 */}
+      <Text style={styles.sectionTitle}>Bookmarks</Text>
+      
+      {/* 그리드 */}
+      <FlatList
+        data={bookmarks}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.grid}
+        scrollEnabled={false}
+        contentContainerStyle={styles.gridContent}
+        removeClippedSubviews={true} // 화면 밖 뷰 제거
+        maxToRenderPerBatch={10} // 한 번에 렌더링할 최대 아이템 수
+        updateCellsBatchingPeriod={50} // 배치 업데이트 주기
+        initialNumToRender={6} // 초기 렌더링 아이템 수
+        windowSize={5} // 렌더링 윈도우 크기
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: Theme.Spacing.lg,
+    paddingVertical: Theme.Spacing.md,
+    backgroundColor: Theme.Colors.background.primary, // 딥 다크
+  },
+  
+  sectionTitle: {
+    fontSize: Theme.Typography.fontSize.lg,
+    fontWeight: Theme.Typography.fontWeight.semibold,
+    color: Theme.Colors.text.primary, // E9ECF5
+    marginBottom: Theme.Spacing.md,
+  },
+  
+  title: {
+    fontSize: Theme.Typography.fontSize.sm,
+    fontWeight: Theme.Typography.fontWeight.semibold,
+    color: Theme.Colors.text.primary, // E9ECF5
+    marginBottom: Theme.Spacing.xs,
+    lineHeight: Theme.Typography.lineHeight.tight,
+  },
+  
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  
+  gridContent: {
+    paddingBottom: Theme.Spacing.md,
+  },
+  
+  card: {
+    width: '48%',
+    backgroundColor: Theme.Colors.surface.primary, // 141824
+    borderRadius: Theme.Radius.lg,
+    marginBottom: Theme.Spacing.md,
+    overflow: 'hidden',
+    ...Theme.Shadow.md,
+  },
+  
+  image: {
+    width: '100%',
+    height: 200,
+    backgroundColor: Theme.Colors.border.primary, // 252B3A
+  },
+  
+  content: {
+    padding: Theme.Spacing.md,
+  },
+  
+  title: {
+    fontSize: Theme.Typography.fontSize.sm,
+    fontWeight: Theme.Typography.fontWeight.semibold,
+    color: Theme.Colors.text.primary, // E9ECF5
+    marginBottom: Theme.Spacing.xs,
+    lineHeight: Theme.Typography.lineHeight.tight,
+  },
+  
+  source: {
+    fontSize: Theme.Typography.fontSize.xs,
+    color: Theme.Colors.text.secondary, // AAB0C0
+    marginBottom: Theme.Spacing.sm,
+  },
+  
+  description: {
+    fontSize: Theme.Typography.fontSize.xs,
+    color: Theme.Colors.text.secondary,
+    marginBottom: Theme.Spacing.sm,
+    lineHeight: Theme.Typography.lineHeight.normal,
+  },
+  
+  memoIndicator: {
+    backgroundColor: Theme.Colors.primary[700],
+    paddingHorizontal: Theme.Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Theme.Radius.sm,
+    alignSelf: 'flex-start',
+    marginBottom: Theme.Spacing.sm,
+  },
+  
+  memoText: {
+    fontSize: Theme.Typography.fontSize.xs,
+    color: Theme.Colors.text.primary,
+    fontWeight: Theme.Typography.fontWeight.medium,
+  },
+  
+  tags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Theme.Spacing.xs,
+  },
+  
+  tag: {
+    backgroundColor: Theme.Colors.primary[600], // 5847CC
+    paddingHorizontal: Theme.Spacing.xs,
+    paddingVertical: 2,
+    borderRadius: Theme.Radius.sm,
+  },
+  
+  tagText: {
+    fontSize: Theme.Typography.fontSize.xs,
+    fontWeight: Theme.Typography.fontWeight.medium,
+    color: Theme.Colors.text.primary, // E9ECF5
+  },
+  
+  moreText: {
+    fontSize: Theme.Typography.fontSize.xs,
+    fontWeight: Theme.Typography.fontWeight.normal,
+    color: Theme.Colors.text.tertiary,
+  },
+});
