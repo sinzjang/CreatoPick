@@ -32,7 +32,7 @@ export const BookmarkGrid: React.FC<BookmarkGridProps> = ({
           cache: 'force-cache', // 캐시 강제 사용
         }} 
         style={styles.image}
-        resizeMode="cover"
+        resizeMode="contain" // 이미지 전체가 보이도록
         fadeDuration={300} // 페이드 인 효과
       />
       
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   
   card: {
     width: '48%',
-    backgroundColor: Theme.Colors.surface.primary, // 141824
+    backgroundColor: Theme.Colors.surface.primary,
     borderRadius: Theme.Radius.lg,
     marginBottom: Theme.Spacing.md,
     overflow: 'hidden',
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
   
   image: {
     width: '100%',
-    height: 200,
-    backgroundColor: Theme.Colors.border.primary, // 252B3A
+    aspectRatio: 3 / 4, // 3:4 비율로 이미지 표시 (Pinterest 스타일)
+    backgroundColor: Theme.Colors.border.primary,
   },
   
   content: {
