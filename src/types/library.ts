@@ -1,6 +1,6 @@
 /**
- * Bookmark Types
- * 북마크 관련 타입 정의
+ * Library Types
+ * 라이브러리 아이템 관련 타입 정의
  */
 
 export interface ImageData {
@@ -26,7 +26,7 @@ export interface Conversation {
   timestamp: Date;
 }
 
-export interface EnhancedBookmark {
+export interface EnhancedLibraryItem {
   id: string;
   url: string;
   title: string;
@@ -44,10 +44,10 @@ export interface EnhancedBookmark {
   updatedAt: Date;
 }
 
-export type BookmarkType = 'url' | 'screenshot' | 'manual';
+export type LibraryItemType = 'url' | 'screenshot' | 'manual';
 
-export interface BookmarkFilter {
-  type?: BookmarkType;
+export interface LibraryFilter {
+  type?: LibraryItemType;
   tags?: string[];
   dateRange?: {
     start: Date;

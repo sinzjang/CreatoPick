@@ -1,6 +1,6 @@
 /**
- * Bookmarks Screen
- * 저장된 북마크를 관리하는 전용 화면
+ * Library Screen
+ * 저장된 라이브러리 아이템을 관리하는 전용 화면
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -17,16 +17,16 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme } from '@/theme/tokens';
-import { BookmarkGrid } from '@/components/BookmarkGrid';
-import AddUrlBookmark from '@/components/AddUrlBookmark';
-import { mockBookmarks, BookmarkItem } from '@/data/mock';
-import { EnhancedBookmark } from '@/types/bookmark';
+import { LibraryGrid } from '@/components/LibraryGrid';
+import AddUrlLibraryItem from '@/components/AddUrlLibraryItem';
+import { mockLibraryItems, LibraryItem } from '@/data/mock';
+import { EnhancedLibraryItem } from '@/types/library';
 
-const BOOKMARKS_KEY = '@creatopick_bookmarks';
+const LIBRARY_KEY = '@creatopick_library';
 
-export default function BookmarksScreen() {
+export default function LibraryScreen() {
   const router = useRouter();
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
+  const [items, setItems] = useState<LibraryItem[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFabMenu, setShowFabMenu] = useState(false);
   
@@ -36,10 +36,10 @@ export default function BookmarksScreen() {
   const fabButton2Scale = useRef(new Animated.Value(0)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
 
-  // 화면 포커스 시 북마크 새로고침
+  // 화면 포커스 시 라이브러리 새로고침
   useFocusEffect(
     useCallback(() => {
-      loadBookmarks();
+      loadLibraryItems();
     }, [])
   );
 
@@ -96,71 +96,62 @@ export default function BookmarksScreen() {
     }
   }, [showFabMenu]);
 
-  const loadBookmarks = async () => {
+  // 라이브러리 아이템 로드
+  const loadLibraryItems = async () => {
     try {
-      const saved = await AsyncStorage.getItem(BOOKMARKS_KEY);
-      if (saved) {
-        const savedBookmarks = JSON.parse(saved);
-        // Mock 데이터와 저장된 데이터 합치기
-        setBookmarks([...savedBookmarks, ...mockBookmarks]);
+      const stored = await AsyncStorage.getItem(LIBRARY_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setItems(parsed);
       } else {
-        // 저장된 데이터가 없으면 Mock 데이터만 표시
-        setBookmarks(mockBookmarks);
+        // 초기 데이터 설정
+        setItems(mockLibraryItems);
+        await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(mockLibraryItems));
       }
     } catch (error) {
-      console.error('Load bookmarks error:', error);
-      // 에러 발생 시에도 Mock 데이터 표시
-      setBookmarks(mockBookmarks);
+      console.error('Load library items error:', error);
+      Alert.alert('오류', '라이브러리 아이템을 불러오는데 실패했습니다.');
     }
   };
 
-  // 새 북마크 저장
-  const handleSaveBookmark = async (bookmark: EnhancedBookmark) => {
+  // URL 라이브러리 아이템 저장 핸들러
+  const handleSaveLibraryItem = async (item: EnhancedLibraryItem) => {
     try {
-      // EnhancedBookmark를 BookmarkItem으로 변환
-      // localUri가 있으면 우선 사용, 없으면 URL 사용
-      const firstImage = bookmark.images[0];
-      const imageUrl = firstImage?.localUri || firstImage?.url || '';
-      
-      const newBookmark: BookmarkItem = {
-        id: bookmark.id,
-        title: bookmark.title,
-        source: bookmark.siteName || 'Web',
-        imageUrl,
-        createdAt: bookmark.createdAt.toISOString(),
-        tags: bookmark.tags,
-        description: bookmark.description,
-        url: bookmark.url,
-        memo: bookmark.userMemo,
+      // EnhancedLibraryItem을 LibraryItem으로 변환
+      const newItem: LibraryItem = {
+        id: item.id,
+        title: item.title,
+        source: item.siteName || 'Web',
+        imageUrl: item.images[0]?.localUri || item.images[0]?.url || '',
+        createdAt: item.createdAt.toISOString(),
+        tags: item.tags,
+        description: item.description,
+        url: item.url,
+        memo: item.userMemo,
       };
 
-      // 기존 북마크에 추가
-      const updatedBookmarks = [newBookmark, ...bookmarks];
-      setBookmarks(updatedBookmarks);
+      const updated = [...items, newItem];
+      setItems(updated);
+      await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(updated));
 
-      // AsyncStorage에 저장 (Mock 데이터 제외)
-      const bookmarksToSave = updatedBookmarks.filter(
-        b => !mockBookmarks.find(m => m.id === b.id)
-      );
-      await AsyncStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarksToSave));
-
-      console.log('Bookmark saved:', newBookmark);
+      console.log('Library item saved:', newItem);
+      Alert.alert('성공', '라이브러리 아이템이 저장되었습니다!');
     } catch (error) {
-      console.error('Save bookmark error:', error);
-      Alert.alert('오류', '북마크 저장에 실패했습니다.');
+      console.error('Save library item error:', error);
+      Alert.alert('오류', '라이브러리 아이템 저장에 실패했습니다.');
     }
   };
 
-  // 북마크 클릭 핸들러 - 상세 페이지로 이동
-  const handleBookmarkPress = (bookmark: BookmarkItem) => {
-    console.log('Bookmark pressed:', bookmark);
+  // 라이브러리 아이템 클릭 핸들러 - 상세 페이지로 이동
+  const handleItemPress = (item: LibraryItem) => {
+    console.log('Library item pressed:', item);
     router.push({
-      pathname: '/bookmark-detail',
+      pathname: '/library-detail',
       params: {
-        id: bookmark.id,
-        imageUri: bookmark.imageUrl,
-        title: bookmark.title,
-        source: bookmark.source || '',
+        id: item.id,
+        imageUri: item.imageUrl,
+        title: item.title,
+        source: item.source || '',
         category: 'ux-ui', // TODO: 실제 카테고리 저장 필요
       },
     });
@@ -172,15 +163,15 @@ export default function BookmarksScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Library</Text>
         <Text style={styles.headerSubtitle}>
-          {bookmarks.length}개의 북마크
+          {items.length}개의 아이템
         </Text>
       </View>
 
-      {/* Bookmarks Grid */}
+      {/* Library Grid */}
       <ScrollView style={styles.content}>
-        <BookmarkGrid
-          bookmarks={bookmarks}
-          onBookmarkPress={handleBookmarkPress}
+        <LibraryGrid
+          items={items}
+          onItemPress={handleItemPress}
         />
       </ScrollView>
 
@@ -215,7 +206,7 @@ export default function BookmarksScreen() {
               style={styles.fabSubButtonInner}
               onPress={() => {
                 setShowFabMenu(false);
-                router.push('/create-bookmark');
+                router.push('/create-library-item');
               }}
               activeOpacity={0.8}
             >
@@ -270,11 +261,11 @@ export default function BookmarksScreen() {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Add URL Modal */}
-      <AddUrlBookmark
+      {/* Add URL Library Item Modal */}
+      <AddUrlLibraryItem
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSave={handleSaveBookmark}
+        onSave={handleSaveLibraryItem}
       />
     </View>
   );

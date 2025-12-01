@@ -1,6 +1,6 @@
 /**
  * Dashboard Screen - Home Tab
- * 최근 검색어와 북마크를 보여주는 메인 홈 화면
+ * 최근 검색어와 라이브러리 아이템을 보여주는 메인 홈 화면
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -9,41 +9,41 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '@/components/Header';
 import { SearchHistoryList } from '@/components/SearchHistoryList';
-import { BookmarkGrid } from '@/components/BookmarkGrid';
+import { LibraryGrid } from '@/components/LibraryGrid';
 import { RolePresetCarousel } from '@/components/RolePresetCarousel';
 import { PresetCreationModal } from '@/components/PresetCreationModal';
 import { Theme } from '@/theme/tokens';
-import { mockUser, mockSearchHistory, mockBookmarks, mockRolePresets, RolePreset, BookmarkItem } from '@/data/mock';
+import { mockUser, mockSearchHistory, mockLibraryItems, mockRolePresets, RolePreset, LibraryItem } from '@/data/mock';
 
-const BOOKMARKS_KEY = '@creatopick_bookmarks';
+const LIBRARY_KEY = '@creatopick_library';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [presets, setPresets] = useState(mockRolePresets);
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(mockBookmarks);
+  const [items, setItems] = useState<LibraryItem[]>(mockLibraryItems);
 
-  const loadBookmarks = useCallback(async () => {
+  const loadLibraryItems = useCallback(async () => {
     try {
-      const saved = await AsyncStorage.getItem(BOOKMARKS_KEY);
+      const saved = await AsyncStorage.getItem(LIBRARY_KEY);
       if (saved) {
-        const savedBookmarks = JSON.parse(saved);
+        const savedItems = JSON.parse(saved);
         // Mock 데이터와 저장된 데이터 합치기 (최대 6개만 표시)
-        setBookmarks([...savedBookmarks, ...mockBookmarks].slice(0, 6));
+        setItems([...savedItems, ...mockLibraryItems].slice(0, 6));
       } else {
-        setBookmarks(mockBookmarks);
+        setItems(mockLibraryItems);
       }
     } catch (error) {
-      console.error('Load bookmarks error:', error);
-      setBookmarks(mockBookmarks);
+      console.error('Load library items error:', error);
+      setItems(mockLibraryItems);
     }
   }, []);
 
-  // 화면 포커스 시 북마크 새로고침
+  // 화면 포커스 시 라이브러리 새로고침
   useFocusEffect(
     useCallback(() => {
-      loadBookmarks();
-    }, [loadBookmarks])
+      loadLibraryItems();
+    }, [loadLibraryItems])
   );
 
   // 검색어 클릭 핸들러 (나중에 검색 화면으로 이동)
@@ -51,17 +51,17 @@ export default function DashboardScreen() {
     console.log('Search pressed:', query);
   };
 
-  // 북마크 클릭 핸들러 - 상세 페이지로 이동
-  const handleBookmarkPress = (bookmark: BookmarkItem) => {
-    console.log('Bookmark pressed:', bookmark);
+  // 라이브러리 아이템 클릭 핸들러 - 상세 페이지로 이동
+  const handleItemPress = (item: LibraryItem) => {
+    console.log('Library item pressed:', item);
     router.push({
-      pathname: '/bookmark-detail',
+      pathname: '/library-detail',
       params: {
-        id: bookmark.id,
-        imageUri: bookmark.imageUrl,
-        title: bookmark.title,
-        source: bookmark.source || '',
-        category: 'ux-ui',
+        id: item.id,
+        imageUri: item.imageUrl,
+        title: item.title,
+        source: item.source || '',
+        category: 'ux-ui', // TODO: 실제 카테고리 저장 필요
       },
     });
   };
@@ -122,10 +122,10 @@ export default function DashboardScreen() {
           onSearchPress={handleSearchPress}
         />
         
-        {/* 북마크 그리드 */}
-        <BookmarkGrid 
-          bookmarks={bookmarks}
-          onBookmarkPress={handleBookmarkPress}
+        {/* 라이브러리 그리드 */}
+        <LibraryGrid
+          items={items}
+          onItemPress={handleItemPress}
         />
       </ScrollView>
       

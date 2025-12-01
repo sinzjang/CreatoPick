@@ -17,7 +17,7 @@ export interface SearchHistoryItem {
   resultCount?: number;
 }
 
-export interface BookmarkItem {
+export interface LibraryItem {
   id: string;
   title: string;
   source?: string;
@@ -89,8 +89,8 @@ export const mockSearchHistory: SearchHistoryItem[] = [
   },
 ];
 
-// Mock Bookmarks (저장된 이미지)
-export const mockBookmarks: BookmarkItem[] = [
+// Mock Library Items (저장된 이미지)
+export const mockLibraryItems: LibraryItem[] = [
   {
     id: '1',
     title: 'Gamification App Design',

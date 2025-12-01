@@ -1,28 +1,28 @@
 /**
- * Bookmark Grid Component
+ * Library Grid Component
  * 저장된 이미지를 2열 그리드로 표시
  */
 
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { Theme } from '@/theme/tokens';
-import { BookmarkItem } from '@/data/mock';
+import { LibraryItem } from '@/data/mock';
 
-interface BookmarkGridProps {
-  bookmarks: BookmarkItem[];
+interface LibraryGridProps {
+  items: LibraryItem[];
   title?: string;
-  onBookmarkPress?: (bookmark: BookmarkItem) => void;
+  onItemPress?: (item: LibraryItem) => void;
 }
 
-export const BookmarkGrid: React.FC<BookmarkGridProps> = ({ 
-  bookmarks, 
+export const LibraryGrid: React.FC<LibraryGridProps> = ({ 
+  items, 
   title,
-  onBookmarkPress 
+  onItemPress 
 }) => {
-  const renderItem = ({ item }: { item: BookmarkItem }) => (
+  const renderItem = ({ item }: { item: LibraryItem }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => onBookmarkPress?.(item)}
+      onPress={() => onItemPress?.(item)}
       activeOpacity={0.8}
     >
       {/* 이미지 */}
@@ -79,11 +79,11 @@ export const BookmarkGrid: React.FC<BookmarkGridProps> = ({
   return (
     <View style={styles.container}>
       {/* 섹션 타이틀 */}
-      <Text style={styles.sectionTitle}>Bookmarks</Text>
+      <Text style={styles.sectionTitle}>Library</Text>
       
       {/* 그리드 */}
       <FlatList
-        data={bookmarks}
+        data={items}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         numColumns={2}

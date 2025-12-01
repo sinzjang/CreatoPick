@@ -1,6 +1,6 @@
 /**
- * Add URL Bookmark Component
- * URL을 입력받아 크롤링하고 북마크를 생성하는 컴포넌트
+ * Add URL Library Item Component
+ * URL을 입력받아 크롤링하고 라이브러리 아이템을 생성하는 컴포넌트
  */
 
 import React, { useState } from 'react';
@@ -23,15 +23,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Theme } from '@/theme/tokens';
 import { smartCrawl, CrawledData } from '@/services/urlCrawler';
 import { downloadImage } from '@/services/imageDownloader';
-import { EnhancedBookmark, ImageData } from '@/types/bookmark';
+import { EnhancedLibraryItem, ImageData } from '@/types/library';
 
-interface AddUrlBookmarkProps {
+interface AddUrlLibraryItemProps {
   visible: boolean;
   onClose: () => void;
-  onSave: (bookmark: EnhancedBookmark) => void;
+  onSave: (item: EnhancedLibraryItem) => void;
 }
 
-export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookmarkProps) {
+export default function AddUrlLibraryItem({ visible, onClose, onSave }: AddUrlLibraryItemProps) {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [crawledData, setCrawledData] = useState<CrawledData | null>(null);
@@ -116,7 +116,7 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
       const successCount = images.filter(img => img.localUri).length;
       console.log(`Downloaded ${successCount}/${images.length} images successfully`);
 
-      const bookmark: EnhancedBookmark = {
+      const item: EnhancedLibraryItem = {
         id: Date.now().toString(),
         url: crawledData.url,
         title: crawledData.title,
@@ -130,7 +130,7 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
         updatedAt: new Date(),
       };
 
-      onSave(bookmark);
+      onSave(item);
       
       Alert.alert(
         '성공', 
@@ -178,7 +178,7 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
           <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
             <Ionicons name="close" size={28} color={Theme.Colors.text.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>URL 북마크 추가</Text>
+          <Text style={styles.headerTitle}>URL 아이템 추가</Text>
           <View style={styles.placeholder} />
         </View>
 
