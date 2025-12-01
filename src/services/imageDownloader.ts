@@ -1,7 +1,7 @@
 /**
  * Image Downloader Service
  * URL에서 이미지를 다운로드하여 로컬에 저장
- * Expo SDK v54 호환 버전 (fetch 사용)
+ * Expo SDK v54 호환 버전
  */
 
 import * as FileSystem from 'expo-file-system';
@@ -34,7 +34,19 @@ function getFilenameFromUrl(url: string): string {
 }
 
 /**
- * 이미지를 다운로드하여 로컬에 저장 (fetch 사용)
+ * ArrayBuffer를 Base64로 변환
+ */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+/**
+ * 이미지를 다운로드하여 로컬에 저장
  */
 export async function downloadImage(imageUrl: string): Promise<DownloadResult> {
   try {
@@ -51,21 +63,11 @@ export async function downloadImage(imageUrl: string): Promise<DownloadResult> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    // Blob으로 변환
-    const blob = await response.blob();
+    // ArrayBuffer로 변환
+    const arrayBuffer = await response.arrayBuffer();
     
     // Base64로 인코딩
-    const reader = new FileReader();
-    const base64Data = await new Promise<string>((resolve, reject) => {
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        // data:image/jpeg;base64, 부분 제거
-        const base64 = result.split(',')[1];
-        resolve(base64);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    const base64Data = arrayBufferToBase64(arrayBuffer);
     
     // FileSystem으로 저장
     await FileSystem.writeAsStringAsync(localUri, base64Data, {
