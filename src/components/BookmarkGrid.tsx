@@ -108,18 +108,10 @@ const styles = StyleSheet.create({
   },
   
   sectionTitle: {
-    fontSize: Theme.Typography.fontSize.lg,
-    fontWeight: Theme.Typography.fontWeight.semibold,
-    color: Theme.Colors.text.primary, // E9ECF5
+    fontSize: Theme.Typography.fontSize.xl,
+    fontWeight: Theme.Typography.fontWeight.bold,
+    color: '#1A202C',
     marginBottom: Theme.Spacing.md,
-  },
-  
-  title: {
-    fontSize: Theme.Typography.fontSize.sm,
-    fontWeight: Theme.Typography.fontWeight.semibold,
-    color: Theme.Colors.text.primary, // E9ECF5
-    marginBottom: Theme.Spacing.xs,
-    lineHeight: Theme.Typography.lineHeight.tight,
   },
   
   grid: {
@@ -152,22 +144,23 @@ const styles = StyleSheet.create({
   },
   
   title: {
-    fontSize: Theme.Typography.fontSize.sm,
-    fontWeight: Theme.Typography.fontWeight.semibold,
-    color: Theme.Colors.text.primary, // E9ECF5
+    fontSize: Theme.Typography.fontSize.base,
+    fontWeight: Theme.Typography.fontWeight.bold,
+    color: '#1A202C', // 더 진한 다크 그레이
     marginBottom: Theme.Spacing.xs,
     lineHeight: Theme.Typography.lineHeight.tight,
   },
   
   source: {
-    fontSize: Theme.Typography.fontSize.xs,
-    color: Theme.Colors.text.secondary, // AAB0C0
+    fontSize: Theme.Typography.fontSize.sm,
+    color: '#4A5568', // 중간 그레이
     marginBottom: Theme.Spacing.sm,
+    fontWeight: Theme.Typography.fontWeight.medium,
   },
   
   description: {
-    fontSize: Theme.Typography.fontSize.xs,
-    color: Theme.Colors.text.secondary,
+    fontSize: Theme.Typography.fontSize.sm,
+    color: '#4A5568', // 중간 그레이
     marginBottom: Theme.Spacing.sm,
     lineHeight: Theme.Typography.lineHeight.normal,
   },
@@ -183,8 +176,8 @@ const styles = StyleSheet.create({
   
   memoText: {
     fontSize: Theme.Typography.fontSize.xs,
-    color: Theme.Colors.text.primary,
-    fontWeight: Theme.Typography.fontWeight.medium,
+    color: '#FFFFFF',
+    fontWeight: Theme.Typography.fontWeight.semibold,
   },
   
   tags: {
@@ -194,21 +187,21 @@ const styles = StyleSheet.create({
   },
   
   tag: {
-    backgroundColor: Theme.Colors.primary[600], // 5847CC
-    paddingHorizontal: Theme.Spacing.xs,
-    paddingVertical: 2,
-    borderRadius: Theme.Radius.sm,
+    backgroundColor: Theme.Colors.primary[500],
+    paddingHorizontal: Theme.Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Theme.Radius.md,
   },
   
   tagText: {
     fontSize: Theme.Typography.fontSize.xs,
-    fontWeight: Theme.Typography.fontWeight.medium,
-    color: Theme.Colors.text.primary, // E9ECF5
+    fontWeight: Theme.Typography.fontWeight.semibold,
+    color: '#FFFFFF',
   },
   
   moreText: {
     fontSize: Theme.Typography.fontSize.xs,
-    fontWeight: Theme.Typography.fontWeight.normal,
-    color: Theme.Colors.text.tertiary,
+    fontWeight: Theme.Typography.fontWeight.medium,
+    color: '#718096',
   },
 });
