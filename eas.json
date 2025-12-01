@@ -13,10 +13,20 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "node": "20.18.1",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "OPENAI_API_KEY": "$OPENAI_API_KEY"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "node": "20.18.1",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "OPENAI_API_KEY": "$OPENAI_API_KEY"
+      }
     }
   },
   "submit": {

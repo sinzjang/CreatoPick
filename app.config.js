@@ -24,7 +24,10 @@ export default {
   ],
   ios: {
     bundleIdentifier: "com.sinzjang.creatopick",
-    supportsTablet: true
+    supportsTablet: true,
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false
+    }
   },
   android: {
     package: "com.sinzjang.creatopick",
