@@ -13,10 +13,10 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import * as WebBrowser from 'expo-web-browser';
 import { Theme } from '@/theme/tokens';
 import { generateSearchKeywords } from '../../src/services/searchKeywordGenerator';
 
@@ -60,6 +60,7 @@ export default function SearchScreen() {
   const [topic, setTopic] = useState<string>('');
   const [keywords, setKeywords] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<'google' | 'behance' | 'dribbble' | 'unsplash'>('google');
 
   const handleGenerateKeywords = async () => {
     if (!selectedField || !selectedRole) {
@@ -87,15 +88,23 @@ export default function SearchScreen() {
     }
   };
 
-  const handleKeywordPress = async (keyword: string) => {
-    const searchUrl = `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(keyword)}`;
+  const handleKeywordPress = async (keyword: string, platform: 'google' | 'behance' | 'dribbble' | 'unsplash' = 'google') => {
+    const searchUrls = {
+      google: `https://www.google.com/search?q=${encodeURIComponent(keyword)}&tbm=isch`,
+      behance: `https://www.behance.net/search/projects?search=${encodeURIComponent(keyword)}`,
+      dribbble: `https://dribbble.com/search/${encodeURIComponent(keyword)}`,
+      unsplash: `https://unsplash.com/s/photos/${encodeURIComponent(keyword)}`,
+    };
+    
+    const searchUrl = searchUrls[platform];
     
     try {
-      await WebBrowser.openBrowserAsync(searchUrl, {
-        presentationStyle: WebBrowser.WebBrowserPresentationStyle.AUTOMATIC,
-        controlsColor: Theme.Colors.primary[500],
-        toolbarColor: Theme.Colors.background.primary,
-      });
+      const canOpen = await Linking.canOpenURL(searchUrl);
+      if (canOpen) {
+        await Linking.openURL(searchUrl);
+      } else {
+        Alert.alert('오류', '브라우저를 열 수 없습니다.');
+      }
     } catch (error) {
       console.error('Open browser error:', error);
       Alert.alert('오류', '브라우저를 열 수 없습니다.');
@@ -116,13 +125,13 @@ export default function SearchScreen() {
         {/* 분야 선택 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>분야 *</Text>
-          <View style={styles.fieldGrid}>
+          <View style={styles.fieldList}>
             {FIELDS.map((field) => (
               <TouchableOpacity
                 key={field.id}
                 style={[
-                  styles.fieldCard,
-                  selectedField === field.id && styles.fieldCardSelected,
+                  styles.fieldChip,
+                  selectedField === field.id && styles.fieldChipSelected,
                 ]}
                 onPress={() => {
                   setSelectedField(field.id);
@@ -132,8 +141,9 @@ export default function SearchScreen() {
               >
                 <Ionicons
                   name={field.icon as any}
-                  size={32}
-                  color={selectedField === field.id ? Theme.Colors.primary[500] : Theme.Colors.text.secondary}
+                  size={16}
+                  color={selectedField === field.id ? 'white' : Theme.Colors.text.secondary}
+                  style={{ marginRight: 6 }}
                 />
                 <Text style={[
                   styles.fieldLabel,
@@ -212,13 +222,50 @@ export default function SearchScreen() {
         {keywords.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>추천 검색어</Text>
-            <Text style={styles.keywordHint}>검색어를 탭하면 Pinterest에서 검색됩니다</Text>
+            
+            {/* 플랫폼 선택 */}
+            <View style={styles.platformSelector}>
+              <TouchableOpacity
+                style={[styles.platformChip, selectedPlatform === 'google' && styles.platformChipSelected]}
+                onPress={() => setSelectedPlatform('google')}
+              >
+                <Text style={[styles.platformLabel, selectedPlatform === 'google' && styles.platformLabelSelected]}>
+                  Google Images
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.platformChip, selectedPlatform === 'behance' && styles.platformChipSelected]}
+                onPress={() => setSelectedPlatform('behance')}
+              >
+                <Text style={[styles.platformLabel, selectedPlatform === 'behance' && styles.platformLabelSelected]}>
+                  Behance
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.platformChip, selectedPlatform === 'dribbble' && styles.platformChipSelected]}
+                onPress={() => setSelectedPlatform('dribbble')}
+              >
+                <Text style={[styles.platformLabel, selectedPlatform === 'dribbble' && styles.platformLabelSelected]}>
+                  Dribbble
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.platformChip, selectedPlatform === 'unsplash' && styles.platformChipSelected]}
+                onPress={() => setSelectedPlatform('unsplash')}
+              >
+                <Text style={[styles.platformLabel, selectedPlatform === 'unsplash' && styles.platformLabelSelected]}>
+                  Unsplash
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.keywordHint}>검색어를 탭하면 {selectedPlatform === 'google' ? 'Google Images' : selectedPlatform === 'behance' ? 'Behance' : selectedPlatform === 'dribbble' ? 'Dribbble' : 'Unsplash'}에서 검색됩니다</Text>
             <View style={styles.keywordList}>
               {keywords.map((keyword, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.keywordCard}
-                  onPress={() => handleKeywordPress(keyword)}
+                  onPress={() => handleKeywordPress(keyword, selectedPlatform)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.keywordContent}>
@@ -276,37 +323,36 @@ const styles = StyleSheet.create({
     marginBottom: Theme.Spacing.md,
   },
   
-  fieldGrid: {
+  fieldList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Theme.Spacing.md,
+    gap: Theme.Spacing.sm,
   },
   
-  fieldCard: {
-    width: '47%',
+  fieldChip: {
     backgroundColor: Theme.Colors.surface.primary,
-    borderRadius: Theme.Radius.lg,
-    padding: Theme.Spacing.lg,
+    paddingHorizontal: Theme.Spacing.md,
+    paddingVertical: Theme.Spacing.sm,
+    borderRadius: Theme.Radius.full,
+    borderWidth: 1,
+    borderColor: Theme.Colors.border.primary,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-    ...Theme.Shadow.sm,
   },
   
-  fieldCardSelected: {
+  fieldChipSelected: {
+    backgroundColor: Theme.Colors.primary[500],
     borderColor: Theme.Colors.primary[500],
-    backgroundColor: Theme.Colors.primary[50],
   },
   
   fieldLabel: {
     fontSize: Theme.Typography.fontSize.sm,
-    fontWeight: Theme.Typography.fontWeight.semibold,
-    color: Theme.Colors.text.secondary,
-    marginTop: Theme.Spacing.sm,
+    fontWeight: Theme.Typography.fontWeight.medium,
+    color: Theme.Colors.text.primary,
   },
   
   fieldLabelSelected: {
-    color: Theme.Colors.primary[500],
+    color: 'white',
   },
   
   roleList: {
@@ -403,5 +449,36 @@ const styles = StyleSheet.create({
     fontWeight: Theme.Typography.fontWeight.medium,
     color: '#1A202C',
     flex: 1,
+  },
+  
+  platformSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Theme.Spacing.xs,
+    marginBottom: Theme.Spacing.md,
+  },
+  
+  platformChip: {
+    backgroundColor: Theme.Colors.surface.primary,
+    paddingHorizontal: Theme.Spacing.md,
+    paddingVertical: Theme.Spacing.xs,
+    borderRadius: Theme.Radius.full,
+    borderWidth: 1,
+    borderColor: Theme.Colors.border.primary,
+  },
+  
+  platformChipSelected: {
+    backgroundColor: Theme.Colors.secondary[500],
+    borderColor: Theme.Colors.secondary[500],
+  },
+  
+  platformLabel: {
+    fontSize: Theme.Typography.fontSize.xs,
+    fontWeight: Theme.Typography.fontWeight.medium,
+    color: Theme.Colors.text.primary,
+  },
+  
+  platformLabelSelected: {
+    color: 'white',
   },
 });
