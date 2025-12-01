@@ -18,7 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Theme } from '@/theme/tokens';
-import { generateSearchKeywords } from '@/services/searchKeywordGenerator';
+import { generateSearchKeywords } from '../../src/services/searchKeywordGenerator';
 
 const FIELDS = [
   { id: 'design', label: '디자인', icon: 'color-palette-outline' },
