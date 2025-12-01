@@ -88,7 +88,7 @@ export default function SearchScreen() {
   };
 
   const handleKeywordPress = async (keyword: string) => {
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+    const searchUrl = `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(keyword)}`;
     
     try {
       await WebBrowser.openBrowserAsync(searchUrl, {
@@ -212,7 +212,7 @@ export default function SearchScreen() {
         {keywords.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>추천 검색어</Text>
-            <Text style={styles.keywordHint}>검색어를 탭하면 브라우저에서 검색됩니다</Text>
+            <Text style={styles.keywordHint}>검색어를 탭하면 Pinterest에서 검색됩니다</Text>
             <View style={styles.keywordList}>
               {keywords.map((keyword, index) => (
                 <TouchableOpacity
