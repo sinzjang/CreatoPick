@@ -15,8 +15,11 @@ import {
   Image,
   ScrollView,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Theme } from '@/theme/tokens';
 import { smartCrawl, CrawledData } from '@/services/urlCrawler';
 import { downloadImage } from '@/services/imageDownloader';
@@ -156,6 +159,8 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
     onClose();
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <Modal
       visible={visible}
@@ -163,9 +168,13 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
       transparent={false}
       onRequestClose={handleClose}
     >
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
+      <KeyboardAvoidingView 
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+          {/* Header */}
+          <View style={[styles.header, { paddingTop: insets.top }]}>
           <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
             <Ionicons name="close" size={28} color={Theme.Colors.text.primary} />
           </TouchableOpacity>
@@ -284,7 +293,8 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
             </>
           )}
         </ScrollView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
