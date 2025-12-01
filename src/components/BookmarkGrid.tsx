@@ -135,34 +135,35 @@ const styles = StyleSheet.create({
   
   image: {
     width: '100%',
-    aspectRatio: 3 / 4, // 3:4 비율로 이미지 표시 (Pinterest 스타일)
+    height: 120, // 이미지 높이를 절반으로 축소
     backgroundColor: Theme.Colors.border.primary,
   },
   
   content: {
-    padding: Theme.Spacing.md,
+    padding: Theme.Spacing.lg,
   },
   
   title: {
     fontSize: Theme.Typography.fontSize.base,
     fontWeight: Theme.Typography.fontWeight.bold,
-    color: '#1A202C', // 더 진한 다크 그레이
-    marginBottom: Theme.Spacing.xs,
-    lineHeight: Theme.Typography.lineHeight.tight,
+    color: '#1A202C',
+    marginBottom: Theme.Spacing.sm,
+    lineHeight: 20, // 명시적 lineHeight
   },
   
   source: {
     fontSize: Theme.Typography.fontSize.sm,
-    color: '#4A5568', // 중간 그레이
+    color: '#4A5568',
     marginBottom: Theme.Spacing.sm,
     fontWeight: Theme.Typography.fontWeight.medium,
+    lineHeight: 18,
   },
   
   description: {
     fontSize: Theme.Typography.fontSize.sm,
-    color: '#4A5568', // 중간 그레이
-    marginBottom: Theme.Spacing.sm,
-    lineHeight: Theme.Typography.lineHeight.normal,
+    color: '#4A5568',
+    marginBottom: Theme.Spacing.md,
+    lineHeight: 20, // 명시적 lineHeight
   },
   
   memoIndicator: {
@@ -184,13 +185,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Theme.Spacing.xs,
+    marginTop: Theme.Spacing.xs,
   },
   
   tag: {
     backgroundColor: Theme.Colors.primary[500],
     paddingHorizontal: Theme.Spacing.sm,
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderRadius: Theme.Radius.md,
+    marginBottom: Theme.Spacing.xs,
   },
   
   tagText: {

@@ -170,7 +170,7 @@ export default function BookmarksScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Bookmarks</Text>
+        <Text style={styles.headerTitle}>Library</Text>
         <Text style={styles.headerSubtitle}>
           {bookmarks.length}개의 북마크
         </Text>

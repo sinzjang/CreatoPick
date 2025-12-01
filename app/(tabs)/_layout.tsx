@@ -53,9 +53,18 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="bookmark"
         options={{
-          title: 'Bookmarks',
+          title: 'Library',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bookmark-outline" size={size} color={color} />
+            <Ionicons name="library-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="packs"
+        options={{
+          title: 'Packs',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="albums-outline" size={size} color={color} />
           ),
         }}
       />
