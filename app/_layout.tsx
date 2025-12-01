@@ -5,25 +5,30 @@
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function RootLayout() {
   return (
-    <>
-      <StatusBar style="dark" />
-      <Stack>
+    <SafeAreaProvider>
+      <StatusBar style="dark" translucent backgroundColor="transparent" />
+      <Stack
+        screenOptions={{
+          contentStyle: { backgroundColor: 'transparent' }
+        }}
+      >
         <Stack.Screen 
           name="index" 
           options={{ 
-            headerShown: false, // Welcome 페이지는 헤더 없음
+            headerShown: false,
           }} 
         />
         <Stack.Screen 
           name="(tabs)" 
           options={{ 
-            headerShown: false, // Tab 내부에서 개별 관리
+            headerShown: false,
           }} 
         />
       </Stack>
-    </>
+    </SafeAreaProvider>
   );
 }

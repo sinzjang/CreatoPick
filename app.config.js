@@ -8,10 +8,11 @@ export default {
   slug: "creatopick",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/icon.png",
   userInterfaceStyle: "light",
+  plugins: [
+    "expo-font"
+  ],
   splash: {
-    image: "./assets/splash.png",
     resizeMode: "contain",
     backgroundColor: "#ffffff"
   },
@@ -19,19 +20,24 @@ export default {
     "**/*"
   ],
   ios: {
+    bundleIdentifier: "com.sinzjang.creatopick",
     supportsTablet: true
   },
   android: {
-    adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#ffffff"
+    package: "com.sinzjang.creatopick",
+    softwareKeyboardLayoutMode: "pan",
+    navigationBar: {
+      visible: "immersive",
+      barStyle: "light-content",
+      backgroundColor: "#fbf5f0"
     }
   },
-  web: {
-    favicon: "./assets/favicon.png"
-  },
+  web: {},
   // Environment variables for production
   extra: {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    eas: {
+      projectId: "96020900-189c-4a4b-8fa8-77c6a1914617"
+    }
   }
 };
