@@ -3,6 +3,8 @@
  * Handles environment variables and app settings
  */
 
+import 'dotenv/config';
+
 export default {
   name: "CreatoPick",
   slug: "creatopick",
