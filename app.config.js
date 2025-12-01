@@ -12,7 +12,8 @@ export default {
   orientation: "portrait",
   userInterfaceStyle: "light",
   plugins: [
-    "expo-font"
+    "expo-font",
+    "expo-web-browser"
   ],
   splash: {
     resizeMode: "contain",
