@@ -1,7 +1,7 @@
 /**
  * Image Downloader Service
  * URL에서 이미지를 다운로드하여 로컬에 저장
- * Expo SDK v54 호환 버전 (createDownloadResumable 사용)
+ * Expo SDK v54 호환 버전 (fetch 사용)
  */
 
 import * as FileSystem from 'expo-file-system';
@@ -34,7 +34,7 @@ function getFilenameFromUrl(url: string): string {
 }
 
 /**
- * 이미지를 다운로드하여 로컬에 저장 (createDownloadResumable 사용)
+ * 이미지를 다운로드하여 로컬에 저장 (fetch 사용)
  */
 export async function downloadImage(imageUrl: string): Promise<DownloadResult> {
   try {
@@ -44,28 +44,39 @@ export async function downloadImage(imageUrl: string): Promise<DownloadResult> {
     const filename = getFilenameFromUrl(imageUrl);
     const localUri = `${FileSystem.documentDirectory}${filename}`;
     
-    // createDownloadResumable 사용
-    const downloadResumable = FileSystem.createDownloadResumable(
-      imageUrl,
-      localUri,
-      {},
-      (downloadProgress) => {
-        const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
-        console.log(`Download progress: ${(progress * 100).toFixed(0)}%`);
-      }
-    );
+    // fetch로 이미지 다운로드
+    const response = await fetch(imageUrl);
     
-    const result = await downloadResumable.downloadAsync();
-    
-    if (result && result.uri) {
-      console.log('Image downloaded successfully:', result.uri);
-      return {
-        success: true,
-        localUri: result.uri,
-      };
-    } else {
-      throw new Error('Download failed: no URI returned');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    
+    // Blob으로 변환
+    const blob = await response.blob();
+    
+    // Base64로 인코딩
+    const reader = new FileReader();
+    const base64Data = await new Promise<string>((resolve, reject) => {
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        // data:image/jpeg;base64, 부분 제거
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    
+    // FileSystem으로 저장
+    await FileSystem.writeAsStringAsync(localUri, base64Data, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    console.log('Image downloaded successfully:', localUri);
+    return {
+      success: true,
+      localUri,
+    };
   } catch (error) {
     console.error('Download error:', error);
     return {
