@@ -17,10 +17,10 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme } from '@/theme/tokens';
-import { LibraryGrid } from '@/components/LibraryGrid';
-import AddUrlLibraryItem from '@/components/AddUrlLibraryItem';
+import { LibraryGrid } from '../../src/components/LibraryGrid';
+import AddUrlLibraryItem from '../../src/components/AddUrlLibraryItem';
 import { mockLibraryItems, LibraryItem } from '@/data/mock';
-import { EnhancedLibraryItem } from '@/types/library';
+import { EnhancedLibraryItem } from '../../src/types/library';
 
 const LIBRARY_KEY = '@creatopick_library';
 

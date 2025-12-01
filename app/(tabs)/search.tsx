@@ -13,10 +13,10 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { Theme } from '@/theme/tokens';
 import { generateSearchKeywords } from '../../src/services/searchKeywordGenerator';
 
@@ -89,11 +89,15 @@ export default function SearchScreen() {
 
   const handleKeywordPress = async (keyword: string) => {
     const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-    const canOpen = await Linking.canOpenURL(searchUrl);
     
-    if (canOpen) {
-      await Linking.openURL(searchUrl);
-    } else {
+    try {
+      await WebBrowser.openBrowserAsync(searchUrl, {
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.AUTOMATIC,
+        controlsColor: Theme.Colors.primary[500],
+        toolbarColor: Theme.Colors.background.primary,
+      });
+    } catch (error) {
+      console.error('Open browser error:', error);
       Alert.alert('오류', '브라우저를 열 수 없습니다.');
     }
   };

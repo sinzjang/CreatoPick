@@ -9,7 +9,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '@/components/Header';
 import { SearchHistoryList } from '@/components/SearchHistoryList';
-import { LibraryGrid } from '@/components/LibraryGrid';
+import { LibraryGrid } from '../../src/components/LibraryGrid';
 import { RolePresetCarousel } from '@/components/RolePresetCarousel';
 import { PresetCreationModal } from '@/components/PresetCreationModal';
 import { Theme } from '@/theme/tokens';
