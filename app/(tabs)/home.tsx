@@ -4,24 +4,26 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, FlatList, Dimensions } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '@/components/Header';
 import { SearchHistoryList } from '@/components/SearchHistoryList';
 import { LibraryGrid } from '../../src/components/LibraryGrid';
-import { RolePresetCarousel } from '@/components/RolePresetCarousel';
-import { PresetCreationModal } from '@/components/PresetCreationModal';
 import { Theme } from '@/theme/tokens';
-import { mockUser, mockSearchHistory, mockLibraryItems, mockRolePresets, RolePreset, LibraryItem } from '@/data/mock';
+import { mockUser, mockLibraryItems, LibraryItem } from '@/data/mock';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.7;
+const CARD_MARGIN = 12;
 
 const LIBRARY_KEY = '@creatopick_library';
+const SEARCH_HISTORY_KEY = '@creatopick_search_history';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const [showPresetModal, setShowPresetModal] = useState(false);
-  const [presets, setPresets] = useState(mockRolePresets);
   const [items, setItems] = useState<LibraryItem[]>(mockLibraryItems);
+  const [searchHistory, setSearchHistory] = useState<any[]>([]);
 
   const loadLibraryItems = useCallback(async () => {
     try {
@@ -39,11 +41,24 @@ export default function DashboardScreen() {
     }
   }, []);
 
-  // 화면 포커스 시 라이브러리 새로고침
+  const loadSearchHistory = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(SEARCH_HISTORY_KEY);
+      if (stored) {
+        const history = JSON.parse(stored);
+        setSearchHistory(history.slice(0, 5)); // 최대 5개만 표시
+      }
+    } catch (error) {
+      console.error('Load search history error:', error);
+    }
+  }, []);
+
+  // 화면 포커스 시 라이브러리 및 검색 히스토리 새로고침
   useFocusEffect(
     useCallback(() => {
       loadLibraryItems();
-    }, [loadLibraryItems])
+      loadSearchHistory();
+    }, [loadLibraryItems, loadSearchHistory])
   );
 
   // 검색어 클릭 핸들러 (나중에 검색 화면으로 이동)
@@ -66,38 +81,6 @@ export default function DashboardScreen() {
     });
   };
 
-  // Role Preset 클릭 핸들러
-  const handlePresetPress = (preset: RolePreset) => {
-    console.log('Preset pressed:', preset);
-  };
-
-  // Preset 추가 핸들러
-  const handleAddPreset = () => {
-    setShowPresetModal(true);
-  };
-
-  // Preset 생성 완료 핸들러
-  const handlePresetComplete = (newPreset: {
-    name: string;
-    field: string;
-    role: string;
-    topic?: string;
-  }) => {
-    const preset: RolePreset = {
-      id: Date.now().toString(),
-      name: newPreset.name,
-      field: newPreset.field,
-      role: newPreset.role,
-      color: Theme.Colors.primary[500], // 기본 색상
-    };
-    setPresets([...presets, preset]);
-    console.log('New preset created:', preset);
-  };
-
-  // 모달 닫기 핸들러
-  const handleCloseModal = () => {
-    setShowPresetModal(false);
-  };
 
   return (
     <View style={styles.container}>
@@ -109,32 +92,42 @@ export default function DashboardScreen() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Role Preset 캐러셀 */}
-        <RolePresetCarousel 
-          presets={presets}
-          onPresetPress={handlePresetPress}
-          onAddPress={handleAddPreset}
-        />
-        
         {/* 최근 검색어 */}
-        <SearchHistoryList 
-          searches={mockSearchHistory}
-          onSearchPress={handleSearchPress}
-        />
+        {searchHistory.length > 0 && (
+          <SearchHistoryList 
+            searches={searchHistory}
+            onSearchPress={handleSearchPress}
+          />
+        )}
         
-        {/* 라이브러리 그리드 */}
-        <LibraryGrid
-          items={items}
-          onItemPress={handleItemPress}
-        />
+        {/* Library 캐러셀 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Library</Text>
+          <FlatList
+            data={items}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={CARD_WIDTH + CARD_MARGIN * 2}
+            decelerationRate="fast"
+            contentContainerStyle={styles.carouselContent}
+            renderItem={({ item }) => (
+              <LibraryGrid
+                items={[item]}
+                onItemPress={handleItemPress}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        </View>
+        
+        {/* Packs 섹션 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Packs</Text>
+          <View style={styles.packsPlaceholder}>
+            <Text style={styles.placeholderText}>곧 추가될 예정입니다</Text>
+          </View>
+        </View>
       </ScrollView>
-      
-      {/* Preset Creation Modal */}
-      <PresetCreationModal
-        visible={showPresetModal}
-        onClose={handleCloseModal}
-        onComplete={handlePresetComplete}
-      />
     </View>
   );
 }
@@ -147,5 +140,38 @@ const styles = StyleSheet.create({
   
   scrollView: {
     flex: 1,
+  },
+  
+  section: {
+    marginTop: Theme.Spacing.lg,
+    paddingHorizontal: Theme.Spacing.lg,
+  },
+  
+  sectionTitle: {
+    fontSize: Theme.Typography.fontSize.xl,
+    fontWeight: Theme.Typography.fontWeight.bold,
+    color: '#1A202C',
+    marginBottom: Theme.Spacing.md,
+  },
+  
+  carouselContent: {
+    paddingRight: Theme.Spacing.lg,
+  },
+  
+  packsPlaceholder: {
+    backgroundColor: Theme.Colors.surface.primary,
+    borderRadius: Theme.Radius.lg,
+    padding: Theme.Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 150,
+    borderWidth: 1,
+    borderColor: Theme.Colors.border.primary,
+    borderStyle: 'dashed',
+  },
+  
+  placeholderText: {
+    fontSize: Theme.Typography.fontSize.base,
+    color: Theme.Colors.text.tertiary,
   },
 });

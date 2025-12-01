@@ -17,8 +17,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme } from '@/theme/tokens';
 import { generateSearchKeywords } from '../../src/services/searchKeywordGenerator';
+
+const SEARCH_HISTORY_KEY = '@creatopick_search_history';
 
 const FIELDS = [
   { id: 'design', label: '디자인', icon: 'color-palette-outline' },
@@ -88,6 +91,27 @@ export default function SearchScreen() {
     }
   };
 
+  const saveSearchHistory = async (keyword: string) => {
+    try {
+      const stored = await AsyncStorage.getItem(SEARCH_HISTORY_KEY);
+      const history = stored ? JSON.parse(stored) : [];
+      
+      // 중복 제거 및 최신 검색어를 맨 앞에 추가
+      const newHistory = [
+        {
+          id: Date.now().toString(),
+          query: keyword,
+          timestamp: new Date().toISOString(),
+        },
+        ...history.filter((item: any) => item.query !== keyword)
+      ].slice(0, 10); // 최대 10개만 저장
+      
+      await AsyncStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+    } catch (error) {
+      console.error('Save search history error:', error);
+    }
+  };
+
   const handleKeywordPress = async (keyword: string, platform: 'google' | 'behance' | 'dribbble' | 'unsplash' = 'google') => {
     const searchUrls = {
       google: `https://www.google.com/search?q=${encodeURIComponent(keyword)}&tbm=isch`,
@@ -101,6 +125,8 @@ export default function SearchScreen() {
     try {
       const canOpen = await Linking.canOpenURL(searchUrl);
       if (canOpen) {
+        // 검색 히스토리 저장
+        await saveSearchHistory(keyword);
         await Linking.openURL(searchUrl);
       } else {
         Alert.alert('오류', '브라우저를 열 수 없습니다.');
