@@ -19,6 +19,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Theme } from '@/theme/tokens';
 import { smartCrawl, CrawledData } from '@/services/urlCrawler';
+import { downloadImage } from '@/services/imageDownloader';
 import { EnhancedBookmark, ImageData } from '@/types/bookmark';
 
 interface AddUrlBookmarkProps {
@@ -85,15 +86,32 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
     setIsLoading(true);
     
     try {
-      // 선택된 이미지 URL들 (다운로드 없이 URL만 저장)
+      // 선택된 이미지 URL들
       const selectedImageUrls = selectedImages.map(index => crawledData.images[index]);
       
-      console.log('Saving images...', selectedImageUrls);
+      console.log('Downloading images...', selectedImageUrls);
       
-      // URL만 저장 (로컬 다운로드 생략)
-      const images: ImageData[] = selectedImageUrls.map(url => ({
-        url,
-      }));
+      // 이미지 다운로드 (병렬 처리)
+      const downloadPromises = selectedImageUrls.map(async (url) => {
+        const result = await downloadImage(url);
+        if (result.success && result.localUri) {
+          return {
+            url,
+            localUri: result.localUri,
+          };
+        } else {
+          // 다운로드 실패 시 URL만 저장
+          console.warn('Failed to download image:', url, result.error);
+          return {
+            url,
+          };
+        }
+      });
+
+      const images: ImageData[] = await Promise.all(downloadPromises);
+      
+      const successCount = images.filter(img => img.localUri).length;
+      console.log(`Downloaded ${successCount}/${images.length} images successfully`);
 
       const bookmark: EnhancedBookmark = {
         id: Date.now().toString(),
@@ -113,7 +131,7 @@ export default function AddUrlBookmark({ visible, onClose, onSave }: AddUrlBookm
       
       Alert.alert(
         '성공', 
-        `${images.length}개의 이미지가 저장되었습니다!`
+        `${images.length}개의 이미지 중 ${successCount}개가 다운로드되었습니다!`
       );
       
       // 초기화

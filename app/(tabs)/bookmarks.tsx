@@ -118,11 +118,15 @@ export default function BookmarksScreen() {
   const handleSaveBookmark = async (bookmark: EnhancedBookmark) => {
     try {
       // EnhancedBookmark를 BookmarkItem으로 변환
+      // localUri가 있으면 우선 사용, 없으면 URL 사용
+      const firstImage = bookmark.images[0];
+      const imageUrl = firstImage?.localUri || firstImage?.url || '';
+      
       const newBookmark: BookmarkItem = {
         id: bookmark.id,
         title: bookmark.title,
         source: bookmark.siteName || 'Web',
-        imageUrl: bookmark.images[0]?.url || '',
+        imageUrl,
         createdAt: bookmark.createdAt.toISOString(),
         tags: bookmark.tags,
         description: bookmark.description,
