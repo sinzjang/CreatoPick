@@ -34,19 +34,8 @@ function getFilenameFromUrl(url: string): string {
 }
 
 /**
- * ArrayBuffer를 Base64로 변환
- */
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-}
-
-/**
  * 이미지를 다운로드하여 로컬에 저장
+ * FileSystem.downloadAsync 사용 (간단하고 안정적)
  */
 export async function downloadImage(imageUrl: string): Promise<DownloadResult> {
   try {
@@ -56,29 +45,18 @@ export async function downloadImage(imageUrl: string): Promise<DownloadResult> {
     const filename = getFilenameFromUrl(imageUrl);
     const localUri = `${FileSystem.documentDirectory}${filename}`;
     
-    // fetch로 이미지 다운로드
-    const response = await fetch(imageUrl);
+    // FileSystem.downloadAsync 사용 (권장 방법)
+    const downloadResult = await FileSystem.downloadAsync(imageUrl, localUri);
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (downloadResult.status === 200) {
+      console.log('Image downloaded successfully:', downloadResult.uri);
+      return {
+        success: true,
+        localUri: downloadResult.uri,
+      };
+    } else {
+      throw new Error(`Download failed with status: ${downloadResult.status}`);
     }
-    
-    // ArrayBuffer로 변환
-    const arrayBuffer = await response.arrayBuffer();
-    
-    // Base64로 인코딩
-    const base64Data = arrayBufferToBase64(arrayBuffer);
-    
-    // FileSystem으로 저장
-    await FileSystem.writeAsStringAsync(localUri, base64Data, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    
-    console.log('Image downloaded successfully:', localUri);
-    return {
-      success: true,
-      localUri,
-    };
   } catch (error) {
     console.error('Download error:', error);
     return {
