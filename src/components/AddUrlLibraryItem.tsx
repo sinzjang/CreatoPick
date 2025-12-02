@@ -130,19 +130,23 @@ export default function AddUrlLibraryItem({ visible, onClose, onSave }: AddUrlLi
         updatedAt: new Date(),
       };
 
-      onSave(item);
-      
-      Alert.alert(
-        '성공', 
-        `${images.length}개의 이미지 중 ${successCount}개가 다운로드되었습니다!`
-      );
-      
       // 초기화
       setUrl('');
       setCrawledData(null);
       setSelectedImages([]);
       setMemo('');
+      
+      // 먼저 저장하고 모달 닫기
+      onSave(item);
       onClose();
+      
+      // 저장 완료 알림
+      setTimeout(() => {
+        Alert.alert(
+          '성공', 
+          `${images.length}개의 이미지 중 ${successCount}개가 다운로드되었습니다!`
+        );
+      }, 300);
     } catch (error) {
       console.error('Save error:', error);
       Alert.alert('오류', '북마크 저장에 실패했습니다.');
@@ -340,7 +344,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: Theme.Typography.fontSize.md,
+    fontSize: Theme.Typography.fontSize.base,
     fontWeight: Theme.Typography.fontWeight.semibold,
     color: Theme.Colors.text.primary,
     marginBottom: Theme.Spacing.sm,
@@ -357,7 +361,7 @@ const styles = StyleSheet.create({
     borderRadius: Theme.Radius.md,
     paddingHorizontal: Theme.Spacing.md,
     paddingVertical: Theme.Spacing.sm,
-    fontSize: Theme.Typography.fontSize.md,
+    fontSize: Theme.Typography.fontSize.base,
     color: Theme.Colors.text.primary,
     borderWidth: 1,
     borderColor: Theme.Colors.border.primary,
@@ -375,7 +379,7 @@ const styles = StyleSheet.create({
 
   crawlButtonText: {
     color: 'white',
-    fontSize: Theme.Typography.fontSize.md,
+    fontSize: Theme.Typography.fontSize.base,
     fontWeight: Theme.Typography.fontWeight.semibold,
   },
 
@@ -443,7 +447,7 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.Colors.surface.primary,
     borderRadius: Theme.Radius.md,
     padding: Theme.Spacing.md,
-    fontSize: Theme.Typography.fontSize.md,
+    fontSize: Theme.Typography.fontSize.base,
     color: Theme.Colors.text.primary,
     borderWidth: 1,
     borderColor: Theme.Colors.border.primary,

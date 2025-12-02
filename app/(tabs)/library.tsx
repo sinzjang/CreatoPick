@@ -130,15 +130,19 @@ export default function LibraryScreen() {
         memo: item.userMemo,
       };
 
-      const updated = [...items, newItem];
+      // 먼저 상태 업데이트
+      const updated = [newItem, ...items];
       setItems(updated);
+      
+      // 그 다음 AsyncStorage에 저장
       await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(updated));
 
       console.log('Library item saved:', newItem);
-      Alert.alert('성공', '라이브러리 아이템이 저장되었습니다!');
     } catch (error) {
       console.error('Save library item error:', error);
       Alert.alert('오류', '라이브러리 아이템 저장에 실패했습니다.');
+      // 실패 시 다시 로드
+      loadLibraryItems();
     }
   };
 
