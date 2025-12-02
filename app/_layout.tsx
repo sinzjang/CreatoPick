@@ -13,7 +13,8 @@ export default function RootLayout() {
       <StatusBar style="dark" translucent backgroundColor="transparent" />
       <Stack
         screenOptions={{
-          contentStyle: { backgroundColor: 'transparent' }
+          contentStyle: { backgroundColor: 'transparent' },
+          headerShown: false,
         }}
       >
         <Stack.Screen 
@@ -24,6 +25,12 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="(tabs)" 
+          options={{ 
+            headerShown: false,
+          }} 
+        />
+        <Stack.Screen 
+          name="library-detail" 
           options={{ 
             headerShown: false,
           }} 
