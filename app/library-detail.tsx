@@ -102,17 +102,18 @@ export default function BookmarkDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={28} color={Theme.Colors.text.primary} />
+          <Ionicons name="arrow-back" size={24} color={Theme.Colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>메모 작성</Text>
         <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+          <Ionicons name="checkmark" size={24} color="white" />
           <Text style={styles.saveButtonText}>저장</Text>
         </TouchableOpacity>
       </View>
@@ -133,8 +134,11 @@ export default function BookmarkDetailScreen() {
         </View>
       </TouchableOpacity>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* 메모 필드 */}
         <View style={styles.memoSection}>
           <Text style={styles.sectionTitle}>UX/UI 분석</Text>
@@ -169,18 +173,6 @@ export default function BookmarkDetailScreen() {
           ))}
         </View>
       </ScrollView>
-
-      {/* Bottom Save Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.bottomSaveButton}
-          onPress={handleSave}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="checkmark-circle" size={24} color="white" />
-          <Text style={styles.bottomSaveButtonText}>저장하기</Text>
-        </TouchableOpacity>
-      </View>
 
       {/* 전체 화면 이미지 모달 */}
       <Modal
@@ -227,10 +219,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Theme.Spacing.lg,
-    paddingTop: Theme.Spacing.xl,
-    paddingBottom: Theme.Spacing.md,
+    paddingVertical: Theme.Spacing.md,
+    backgroundColor: Theme.Colors.background.primary,
     borderBottomWidth: 1,
-    borderBottomColor: Theme.Colors.border,
+    borderBottomColor: Theme.Colors.border.primary,
   },
 
   backButton: {
@@ -244,18 +236,27 @@ const styles = StyleSheet.create({
   },
 
   saveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Theme.Colors.primary[500],
     paddingHorizontal: Theme.Spacing.md,
-    paddingVertical: Theme.Spacing.xs,
+    paddingVertical: Theme.Spacing.sm,
+    borderRadius: Theme.Radius.md,
+    gap: 6,
   },
 
   saveButtonText: {
     fontSize: Theme.Typography.fontSize.base,
     fontWeight: Theme.Typography.fontWeight.semibold,
-    color: Theme.Colors.primary[500],
+    color: 'white',
   },
 
   content: {
     flex: 1,
+  },
+
+  scrollContent: {
+    paddingBottom: Theme.Spacing.xl,
   },
 
   // 상단 고정 썸네일
@@ -373,33 +374,11 @@ const styles = StyleSheet.create({
     fontSize: Theme.Typography.fontSize.base,
     color: Theme.Colors.text.primary,
     borderWidth: 1,
-    borderColor: Theme.Colors.border,
+    borderColor: Theme.Colors.border.primary,
   },
 
   fieldInputMultiline: {
     minHeight: 100,
     paddingTop: Theme.Spacing.md,
-  },
-
-  footer: {
-    padding: Theme.Spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: Theme.Colors.border,
-  },
-
-  bottomSaveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Theme.Colors.primary[500],
-    paddingVertical: Theme.Spacing.md,
-    borderRadius: Theme.Radius.lg,
-    gap: Theme.Spacing.sm,
-  },
-
-  bottomSaveButtonText: {
-    fontSize: Theme.Typography.fontSize.base,
-    fontWeight: Theme.Typography.fontWeight.semibold,
-    color: 'white',
   },
 });
