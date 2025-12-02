@@ -46,6 +46,7 @@ export default function LibraryScreen() {
   // FAB 메뉴 애니메이션
   useEffect(() => {
     if (showFabMenu) {
+      // 열기 애니메이션
       Animated.parallel([
         Animated.timing(fabRotation, {
           toValue: 1,
@@ -71,30 +72,33 @@ export default function LibraryScreen() {
         ]),
       ]).start();
     } else {
-      Animated.parallel([
+      // 닫기 애니메이션 - 버튼 먼저 사라지고 회전
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(fabButton2Scale, {
+            toValue: 0,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fabButton1Scale, {
+            toValue: 0,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+          Animated.timing(overlayOpacity, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+        ]),
         Animated.timing(fabRotation, {
           toValue: 0,
           duration: 200,
           useNativeDriver: true,
         }),
-        Animated.timing(overlayOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fabButton1Scale, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fabButton2Scale, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
       ]).start();
     }
-  }, [showFabMenu]);
+  }, [showFabMenu, fabRotation, overlayOpacity, fabButton1Scale, fabButton2Scale]);
 
   // 라이브러리 아이템 로드
   const loadLibraryItems = async () => {
