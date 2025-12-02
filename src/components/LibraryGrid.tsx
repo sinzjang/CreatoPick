@@ -52,13 +52,6 @@ export const LibraryGrid: React.FC<LibraryGridProps> = ({
           </Text>
         )}
         
-        {/* 메모 표시 */}
-        {item.memo && (
-          <View style={styles.memoIndicator}>
-            <Text style={styles.memoText}>📝 메모 있음</Text>
-          </View>
-        )}
-        
         {/* 태그 */}
         {item.tags && item.tags.length > 0 && (
           <View style={styles.tags}>
@@ -164,21 +157,6 @@ const styles = StyleSheet.create({
     color: '#4A5568',
     marginBottom: Theme.Spacing.md,
     lineHeight: 20, // 명시적 lineHeight
-  },
-  
-  memoIndicator: {
-    backgroundColor: Theme.Colors.primary[700],
-    paddingHorizontal: Theme.Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: Theme.Radius.sm,
-    alignSelf: 'flex-start',
-    marginBottom: Theme.Spacing.sm,
-  },
-  
-  memoText: {
-    fontSize: Theme.Typography.fontSize.xs,
-    color: '#FFFFFF',
-    fontWeight: Theme.Typography.fontWeight.semibold,
   },
   
   tags: {
