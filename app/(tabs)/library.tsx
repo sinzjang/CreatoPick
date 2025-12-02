@@ -43,14 +43,17 @@ export default function LibraryScreen() {
     }, [])
   );
 
-  // FAB 메뉴 애니메이션
-  useEffect(() => {
-    if (showFabMenu) {
+  // FAB 메뉴 열기/닫기 애니메이션 함수
+  const toggleFabMenu = () => {
+    const newState = !showFabMenu;
+    
+    if (newState) {
       // 열기 애니메이션
+      setShowFabMenu(true);
       Animated.parallel([
         Animated.timing(fabRotation, {
           toValue: 1,
-          duration: 200,
+          duration: 300,
           useNativeDriver: true,
         }),
         Animated.timing(overlayOpacity, {
@@ -72,33 +75,35 @@ export default function LibraryScreen() {
         ]),
       ]).start();
     } else {
-      // 닫기 애니메이션 - 버튼 먼저 사라지고 회전
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(fabButton2Scale, {
-            toValue: 0,
-            duration: 150,
-            useNativeDriver: true,
-          }),
-          Animated.timing(fabButton1Scale, {
-            toValue: 0,
-            duration: 150,
-            useNativeDriver: true,
-          }),
-          Animated.timing(overlayOpacity, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]),
+      // 닫기 애니메이션 - 애니메이션 완료 후 상태 변경
+      Animated.parallel([
         Animated.timing(fabRotation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(overlayOpacity, {
           toValue: 0,
           duration: 200,
           useNativeDriver: true,
         }),
-      ]).start();
+        Animated.timing(fabButton1Scale, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fabButton2Scale, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start(({ finished }) => {
+        if (finished) {
+          setShowFabMenu(false);
+        }
+      });
     }
-  }, [showFabMenu, fabRotation, overlayOpacity, fabButton1Scale, fabButton2Scale]);
+  };
 
   // 라이브러리 아이템 로드
   const loadLibraryItems = async () => {
@@ -196,7 +201,7 @@ export default function LibraryScreen() {
             <TouchableOpacity
               style={{ flex: 1 }}
               activeOpacity={1}
-              onPress={() => setShowFabMenu(false)}
+              onPress={toggleFabMenu}
             />
           </Animated.View>
 
@@ -213,8 +218,8 @@ export default function LibraryScreen() {
             <TouchableOpacity
               style={styles.fabSubButtonInner}
               onPress={() => {
-                setShowFabMenu(false);
-                router.push('/create-library-item');
+                toggleFabMenu();
+                setTimeout(() => router.push('/create-library-item'), 300);
               }}
               activeOpacity={0.8}
             >
@@ -235,8 +240,8 @@ export default function LibraryScreen() {
             <TouchableOpacity
               style={styles.fabSubButtonInner}
               onPress={() => {
-                setShowFabMenu(false);
-                setShowAddModal(true);
+                toggleFabMenu();
+                setTimeout(() => setShowAddModal(true), 300);
               }}
               activeOpacity={0.8}
             >
@@ -262,7 +267,7 @@ export default function LibraryScreen() {
       >
         <TouchableOpacity
           style={styles.fabMainButtonInner}
-          onPress={() => setShowFabMenu(!showFabMenu)}
+          onPress={toggleFabMenu}
           activeOpacity={0.8}
         >
           <Ionicons name="add" size={32} color="white" />

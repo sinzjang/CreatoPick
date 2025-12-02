@@ -75,51 +75,67 @@ export async function crawlPinterestUrl(url: string): Promise<CrawledData> {
     const extractPinterestImage = (): string[] => {
       const images: string[] = [];
       
-      // 1순위: elementtiming="closeupImage" (가장 정확한 메인 이미지)
-      const closeupImageMatch = html.match(
-        /elementtiming="closeupImage"[^>]*src="([^"]*)"/
-      );
-      if (closeupImageMatch) {
-        images.push(closeupImageMatch[1]);
-        console.log('Found closeup image:', closeupImageMatch[1]);
-      }
-      
-      // 2순위: StoryPinImageBlock-MainPinImage (스토리 핀)
-      const storyImageMatch = html.match(
-        /elementtiming="StoryPinImageBlock-MainPinImage"[^>]*src="([^"]*)"/
-      );
-      if (storyImageMatch) {
-        images.push(storyImageMatch[1]);
-        console.log('Found story pin image:', storyImageMatch[1]);
-      }
-      
-      // 3순위: og:image
+      // 1순위: og:image (가장 신뢰할 수 있는 메인 이미지)
       const ogImageMatch = html.match(/<meta property="og:image" content="([^"]*)"/i);
-      if (ogImageMatch) {
-        images.push(ogImageMatch[1]);
+      if (ogImageMatch && ogImageMatch[1]) {
+        const ogImage = ogImageMatch[1];
+        // 유효한 이미지 URL인지 확인
+        if (ogImage.startsWith('http') && !ogImage.includes('placeholder')) {
+          images.push(ogImage);
+          console.log('Found og:image:', ogImage);
+        }
       }
       
-      // 4순위: originals (최고 품질)
-      const originalsRegex = /https:\/\/i\.pinimg\.com\/originals\/[^"'\s]*/gi;
+      // 2순위: originals (최고 품질 원본)
+      const originalsRegex = /https:\/\/i\.pinimg\.com\/originals\/[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]+\.(jpg|jpeg|png|webp)/gi;
       let match;
+      const originalsSet = new Set<string>();
       while ((match = originalsRegex.exec(html)) !== null) {
-        images.push(match[0]);
+        originalsSet.add(match[0]);
       }
+      console.log('Originals found:', originalsSet.size);
       
-      // 5순위: 736x (고품질)
-      const largeRegex = /https:\/\/i\.pinimg\.com\/736x\/[^"'\s]*/gi;
+      // 3순위: 736x (고품질)
+      const largeRegex = /https:\/\/i\.pinimg\.com\/736x\/[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]+\.(jpg|jpeg|png|webp)/gi;
+      const largeSet = new Set<string>();
       while ((match = largeRegex.exec(html)) !== null) {
-        images.push(match[0]);
+        largeSet.add(match[0]);
+      }
+      console.log('736x images found:', largeSet.size);
+      
+      // originals 우선, 없으면 736x 사용
+      const highQualityImages = originalsSet.size > 0 
+        ? Array.from(originalsSet) 
+        : Array.from(largeSet);
+      console.log('Using image source:', originalsSet.size > 0 ? 'originals' : '736x');
+      
+      // 필터링할 공통 이미지 (Pinterest UI 요소 등)
+      const excludePatterns = [
+        'd53b014d86a6b6761bf649a0ed813c2b', // Pinterest 공통 이미지
+      ];
+      
+      // 최대 3개만 추가 (중복 방지 및 제외 패턴 필터링)
+      highQualityImages.forEach((img, index) => {
+        // 제외 패턴 체크
+        const shouldExclude = excludePatterns.some(pattern => img.includes(pattern));
+        
+        if (!shouldExclude && !images.includes(img) && images.length < 3) {
+          images.push(img);
+          console.log(`High-quality image ${images.length}:`, img);
+        } else if (shouldExclude) {
+          console.log(`Excluded common image:`, img);
+        }
+      });
+      
+      console.log('Pinterest images found:', images.length);
+      console.log('All images:', images);
+      
+      // 최소 1개 이상의 이미지가 있어야 함
+      if (images.length === 0) {
+        throw new Error('이미지를 찾을 수 없습니다.');
       }
       
-      // 6순위: 564x (중간 품질)
-      const mediumRegex = /https:\/\/i\.pinimg\.com\/564x\/[^"'\s]*/gi;
-      while ((match = mediumRegex.exec(html)) !== null) {
-        images.push(match[0]);
-      }
-      
-      // 중복 제거
-      return [...new Set(images)];
+      return images;
     };
     
     const title = html.match(/<meta property="og:title" content="([^"]*)"/i)?.[1] || 
