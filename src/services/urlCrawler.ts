@@ -163,6 +163,162 @@ export async function crawlPinterestUrl(url: string): Promise<CrawledData> {
 }
 
 /**
+ * Dribbble URL에서 이미지 추출
+ */
+export async function crawlDribbbleUrl(url: string): Promise<CrawledData> {
+  try {
+    console.log('Crawling Dribbble URL:', url);
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+      },
+    });
+    
+    const html = await response.text();
+    
+    const extractDribbbleImage = (): string[] => {
+      const images: string[] = [];
+      
+      // 1순위: og:image
+      const ogImageMatch = html.match(/<meta property="og:image" content="([^"]*)"/i);
+      if (ogImageMatch && ogImageMatch[1]) {
+        images.push(ogImageMatch[1]);
+        console.log('Found Dribbble og:image:', ogImageMatch[1]);
+      }
+      
+      // 2순위: data-img-src (Dribbble 특화)
+      const dataImgRegex = /data-img-src="([^"]*)"/gi;
+      let match;
+      const imgSet = new Set<string>();
+      while ((match = dataImgRegex.exec(html)) !== null) {
+        if (match[1].includes('cdn.dribbble.com/users')) {
+          imgSet.add(match[1]);
+        }
+      }
+      
+      // 3순위: img src (고해상도)
+      const imgSrcRegex = /<img[^>]+src="(https:\/\/cdn\.dribbble\.com\/[^"]+)"/gi;
+      while ((match = imgSrcRegex.exec(html)) !== null) {
+        if (!match[1].includes('avatar')) {
+          imgSet.add(match[1]);
+        }
+      }
+      
+      console.log('Dribbble images found in HTML:', imgSet.size);
+      
+      // 최대 3개 추가
+      Array.from(imgSet).slice(0, 3).forEach(img => {
+        if (!images.includes(img)) {
+          images.push(img);
+        }
+      });
+      
+      if (images.length === 0) {
+        throw new Error('이미지를 찾을 수 없습니다.');
+      }
+      
+      return images;
+    };
+    
+    const title = html.match(/<meta property="og:title" content="([^"]*)"/i)?.[1] || 
+                  html.match(/<title>([^<]*)<\/title>/i)?.[1] || 
+                  'Dribbble Shot';
+    
+    const description = html.match(/<meta property="og:description" content="([^"]*)"/i)?.[1] ||
+                       html.match(/<meta name="description" content="([^"]*)"/i)?.[1];
+    
+    const images = extractDribbbleImage();
+    
+    console.log('Dribbble crawled:', { title, images: images.length });
+    
+    return {
+      url,
+      title,
+      description,
+      images,
+      siteName: 'Dribbble',
+    };
+  } catch (error) {
+    console.error('Dribbble crawl error:', error);
+    throw new Error('Dribbble URL 크롤링에 실패했습니다.');
+  }
+}
+
+/**
+ * Behance URL에서 이미지 추출
+ */
+export async function crawlBehanceUrl(url: string): Promise<CrawledData> {
+  try {
+    console.log('Crawling Behance URL:', url);
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+      },
+    });
+    
+    const html = await response.text();
+    
+    const extractBehanceImage = (): string[] => {
+      const images: string[] = [];
+      
+      // 1순위: og:image
+      const ogImageMatch = html.match(/<meta property="og:image" content="([^"]*)"/i);
+      if (ogImageMatch && ogImageMatch[1]) {
+        images.push(ogImageMatch[1]);
+        console.log('Found Behance og:image:', ogImageMatch[1]);
+      }
+      
+      // 2순위: mir-media (Behance CDN)
+      const behanceRegex = /https:\/\/mir-s3-cdn-cf\.behance\.net\/project_modules\/[^"'\s]+\.(jpg|jpeg|png|webp)/gi;
+      let match;
+      const imgSet = new Set<string>();
+      while ((match = behanceRegex.exec(html)) !== null) {
+        imgSet.add(match[0]);
+      }
+      
+      console.log('Behance images found in HTML:', imgSet.size);
+      
+      // 최대 3개 추가
+      Array.from(imgSet).slice(0, 3).forEach(img => {
+        if (!images.includes(img)) {
+          images.push(img);
+        }
+      });
+      
+      if (images.length === 0) {
+        throw new Error('이미지를 찾을 수 없습니다.');
+      }
+      
+      return images;
+    };
+    
+    const title = html.match(/<meta property="og:title" content="([^"]*)"/i)?.[1] || 
+                  html.match(/<title>([^<]*)<\/title>/i)?.[1] || 
+                  'Behance Project';
+    
+    const description = html.match(/<meta property="og:description" content="([^"]*)"/i)?.[1] ||
+                       html.match(/<meta name="description" content="([^"]*)"/i)?.[1];
+    
+    const images = extractBehanceImage();
+    
+    console.log('Behance crawled:', { title, images: images.length });
+    
+    return {
+      url,
+      title,
+      description,
+      images,
+      siteName: 'Behance',
+    };
+  } catch (error) {
+    console.error('Behance crawl error:', error);
+    throw new Error('Behance URL 크롤링에 실패했습니다.');
+  }
+}
+
+/**
  * URL 타입 감지
  */
 export function detectUrlType(url: string): 'pinterest' | 'dribbble' | 'behance' | 'generic' {
@@ -178,11 +334,15 @@ export function detectUrlType(url: string): 'pinterest' | 'dribbble' | 'behance'
 export async function smartCrawl(url: string): Promise<CrawledData> {
   const urlType = detectUrlType(url);
   
+  console.log('Smart crawl detected URL type:', urlType);
+  
   switch (urlType) {
     case 'pinterest':
       return crawlPinterestUrl(url);
     case 'dribbble':
+      return crawlDribbbleUrl(url);
     case 'behance':
+      return crawlBehanceUrl(url);
     case 'generic':
     default:
       return crawlUrl(url);
